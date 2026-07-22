@@ -1,11 +1,8 @@
 #!/bin/bash
 # Objectif : Extraire par requete API la priorité des Hosts Centreon  dans un fichier .csv
-# 1. Saisie login/password → génération d'un token API Centreon
-# 2. Saisie Hostname (Recherche partielle ou complete) pour requete Get API
-# 3. Requete GET des hosts + jq + redirection vers .csv
-# Prérequis : credentials API centreon + curl + jq +
+# API
 API="https://XXXXXXXXXXXXX/centreon/api/latest"
-# Input credentials API
+# Input login/password API
 echo;read -s -p "Login : " login;echo
 read -s -p "Password : " password;echo
 
@@ -21,9 +18,10 @@ if [[ -z "$token" || "$token" == "null" ]]; then
 fi
 echo "Token generé avec succès"
 
-#-------------------------------------------------------------------------------------
-# Fonctionnement de la recherche par hostname : on peut entrer le nom précis d'un host ou rechercher par Trigramme (Ex: OUT-)
+#----------------------------------------------------------------------------------------------------------
+# Fonctionnement de la recherche par hostname : entrer le nom précis d'un host ou rechercher par Trigramme
 # (si laisser vide ----> Extract de tous les hosts)
+#----------------------------------------------------------------------------------------------------------
 
 echo;read -p "Rechercher par Hostname : " trigramme;echo
 
@@ -37,3 +35,5 @@ curl -s -X GET \
   -H "X-AUTH-TOKEN: $token" \
   "$API/monitoring/hosts?search=$search_url&limit=900000" \
  | jq -r '.result[] | "\(.id);\(.name);\(.alias);'P'\(.criticality)"' > /$HOME/extract_centreon.csv
+
+echo "Extract localisation : /$HOME/extract_centreon.csv"
